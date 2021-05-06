@@ -1,5 +1,5 @@
-# web-py-example
+# flask-watchlist 
 
-## A python web application made by Flask
+## A watchlist app made by Flask 
 
 
