@@ -21,7 +21,12 @@
 </h2> <nav>
         <ul>
             <li><a href="{{ url_for('index') }}">Home</a></li>
-</ul> </nav>
+	    {% if current_user.is_authenticated %}
+    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+{% else %}
+    <li><a href="{{ url_for('login') }}">Login</a></li>
+    {% endif %}
+    <>/ul> </nav>
     {% block content %}{% endblock %}
     <footer>
         <small>&copy; szou.me <a href="https://szou.me">szou.me</a></small>
