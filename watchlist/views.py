@@ -1,24 +1,9 @@
-from flask import Flask, url_for, render_template, request, redirect, flash
-from flask_sqlalchemy import SQLAlchemy
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
-import os
+from watchlist import app, db
+from watchlist.models import Movie, User
 
-app = Flask(__name__)
+from flask_login import login_required, login_user, logout_user, current_user
+from flask import request, url_for, render_template, flash, redirect
 
-@app.context_processor
-def inject_user():
-    user = User.query.first()
-    return dict(user=user)
-
-# Login management through flask_login
-login_manager = LoginManager(app)
-login_manager.login_view = 'login'
-
-@login_manager.user_loader
-def load_user(user_id):
-    user = User.query.get(int(user_id))
-    return user
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -79,10 +64,6 @@ def delete(movie_id):
 def user_page(name):
     return name
 
-@app.errorhandler(404)
-def page_not_found(e):
-    return render_template('404.html'), 404
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -114,28 +95,3 @@ def logout():
     return redirect(url_for('index'))
 
 
-# Config SQLite database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////' + os.path.join(app.root_path, 'data.db') 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
-# Config session
-app.config['SECRET_KEY'] = 'dev'
-
-# Database model
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20))
-    username = db.Column(db.String(20))
-    password_hash = db.Column(db.String(128))
-
-    def set_password(self, password)  :
-        self.password_hash = generate_password_hash(password)
-
-    def validate_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-class Movie(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(60))
-    year = db.Column(db.String(4))
